@@ -23,6 +23,8 @@ import (
 	"reflect"
 	"time"
 
+	"k8s.io/apimachinery/pkg/util/validation"
+
 	utilwait "k8s.io/apimachinery/pkg/util/wait"
 
 	"kubesphere.io/kubesphere/pkg/controller/utils/controller"
@@ -46,7 +48,8 @@ import (
 	"k8s.io/klog"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 
-	iamv1alpha2 "kubesphere.io/kubesphere/pkg/apis/iam/v1alpha2"
+	iamv1alpha2 "kubesphere.io/api/iam/v1alpha2"
+
 	authoptions "kubesphere.io/kubesphere/pkg/apiserver/authentication/options"
 	kubesphere "kubesphere.io/kubesphere/pkg/client/clientset/versioned"
 	kubespherescheme "kubesphere.io/kubesphere/pkg/client/clientset/versioned/scheme"
@@ -486,8 +489,12 @@ func (c *userController) deleteGroupBindings(user *iamv1alpha2.User) error {
 }
 
 func (c *userController) deleteRoleBindings(user *iamv1alpha2.User) error {
+	if len(user.Name) > validation.LabelValueMaxLength {
+		// ignore invalid label value error
+		return nil
+	}
 	listOptions := metav1.ListOptions{
-		LabelSelector: labels.SelectorFromSet(labels.Set{iamv1alpha2.UserReferenceLabel: user.Name}).String(),
+		LabelSelector: labels.SelectorFromValidatedSet(labels.Set{iamv1alpha2.UserReferenceLabel: user.Name}).String(),
 	}
 	deleteOptions := *metav1.NewDeleteOptions(0)
 	if err := c.ksClient.IamV1alpha2().GlobalRoleBindings().

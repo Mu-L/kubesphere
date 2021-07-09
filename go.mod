@@ -15,12 +15,10 @@ require (
 	github.com/asaskevich/govalidator v0.0.0-20200428143746-21a406dcc535
 	github.com/aws/aws-sdk-go v1.33.12
 	github.com/beevik/etree v1.1.0
-	github.com/container-storage-interface/spec v1.2.0
 	github.com/containernetworking/cni v0.8.0
 	github.com/coreos/go-oidc v2.1.0+incompatible
 	github.com/davecgh/go-spew v1.1.1
 	github.com/deckarep/golang-set v1.7.1 // indirect
-	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/docker/distribution v2.7.1+incompatible
 	github.com/docker/docker v1.4.2-0.20200203170920-46ec8731fbce
 	github.com/docker/spdystream v0.0.0-20181023171402-6480d4af844c // indirect
@@ -32,6 +30,7 @@ require (
 	github.com/emicklei/go-restful-openapi v1.4.1
 	github.com/emirpasic/gods v1.12.0 // indirect
 	github.com/fatih/structs v1.1.0
+	github.com/form3tech-oss/jwt-go v3.2.2+incompatible
 	github.com/ghodss/yaml v1.0.0
 	github.com/go-ldap/ldap v3.0.3+incompatible
 	github.com/go-logr/logr v0.3.0
@@ -42,6 +41,7 @@ require (
 	github.com/go-redis/redis v6.15.2+incompatible
 	github.com/go-sql-driver/mysql v1.5.0
 	github.com/gocraft/dbr v0.0.0-20180507214907-a0fd650918f6
+	github.com/gogo/protobuf v1.3.2 // indirect
 	github.com/golang/example v0.0.0-20170904185048-46695d81d1fa
 	github.com/google/go-cmp v0.5.0
 	github.com/google/uuid v1.1.1
@@ -75,8 +75,7 @@ require (
 	github.com/spf13/viper v1.4.0
 	github.com/stretchr/testify v1.6.1
 	github.com/xanzy/ssh-agent v0.2.1 // indirect
-	golang.org/x/crypto v0.0.0-20200728195943-123391ffb6de
-	golang.org/x/net v0.0.0-20201224014010-6772e930b67b
+	golang.org/x/crypto v0.0.0-20210616213533-5ff15b29337e
 	golang.org/x/oauth2 v0.0.0-20200107190931-bf48bf16ab8d
 	google.golang.org/grpc v1.30.0
 	gopkg.in/asn1-ber.v1 v1.0.0-20181015200546-f715ec2f112d // indirect
@@ -105,6 +104,7 @@ require (
 	k8s.io/kubectl v0.19.3
 	k8s.io/metrics v0.18.6
 	k8s.io/utils v0.0.0-20201005171033-6301aaf42dc7
+	kubesphere.io/api v0.0.0
 	kubesphere.io/client-go v0.0.0
 	kubesphere.io/monitoring-dashboard v0.1.2
 	sigs.k8s.io/application v0.8.4-0.20201016185654-c8e2959e57a0
@@ -292,6 +292,7 @@ replace (
 	github.com/felixge/httpsnoop => github.com/felixge/httpsnoop v1.0.1
 	github.com/flynn/go-shlex => github.com/flynn/go-shlex v0.0.0-20150515145356-3f9db97f8568
 	github.com/fogleman/gg => github.com/fogleman/gg v1.2.1-0.20190220221249-0403632d5b90
+	github.com/form3tech-oss/jwt-go => github.com/form3tech-oss/jwt-go v3.2.2+incompatible
 	github.com/franela/goblin => github.com/franela/goblin v0.0.0-20200105215937-c9ffbefa60db
 	github.com/franela/goreq => github.com/franela/goreq v0.0.0-20171204163338-bcd34c9993f8
 	github.com/fsnotify/fsnotify => github.com/fsnotify/fsnotify v1.4.9
@@ -347,7 +348,7 @@ replace (
 	github.com/gofrs/flock => github.com/gofrs/flock v0.7.1
 	github.com/gofrs/uuid => github.com/gofrs/uuid v3.2.0+incompatible
 	github.com/gogo/googleapis => github.com/gogo/googleapis v1.1.0
-	github.com/gogo/protobuf => github.com/gogo/protobuf v1.3.1
+	github.com/gogo/protobuf => github.com/gogo/protobuf v1.3.2
 	github.com/gogo/status => github.com/gogo/status v1.0.3
 	github.com/golang-migrate/migrate/v4 => github.com/golang-migrate/migrate/v4 v4.7.0
 	github.com/golang/example => github.com/golang/example v0.0.0-20170904185048-46695d81d1fa
@@ -663,7 +664,7 @@ replace (
 	go.uber.org/multierr => go.uber.org/multierr v1.3.0
 	go.uber.org/tools => go.uber.org/tools v0.0.0-20190618225709-2cfd321de3ee
 	go.uber.org/zap => go.uber.org/zap v1.13.0
-	golang.org/x/crypto => golang.org/x/crypto v0.0.0-20200622213623-75b288015ac9
+	golang.org/x/crypto => golang.org/x/crypto v0.0.0-20210616213533-5ff15b29337e
 	golang.org/x/exp => golang.org/x/exp v0.0.0-20190121172915-509febef88a4
 	golang.org/x/image => golang.org/x/image v0.0.0-20180708004352-c73c2afc3b81
 	golang.org/x/lint => golang.org/x/lint v0.0.0-20190301231843-5614ed5bae6f
@@ -672,6 +673,7 @@ replace (
 	golang.org/x/oauth2 => golang.org/x/oauth2 v0.0.0-20190402181905-9f3314589c9a
 	golang.org/x/sync => golang.org/x/sync v0.0.0-20190423024810-112230192c58
 	golang.org/x/sys => golang.org/x/sys v0.0.0-20190228124157-a34e9553db1e
+	golang.org/x/term => golang.org/x/term v0.0.0-20201126162022-7de9c90e9dd1
 	golang.org/x/text => golang.org/x/text v0.3.0
 	golang.org/x/time => golang.org/x/time v0.0.0-20190308202827-9d24e82272b4
 	golang.org/x/tools => golang.org/x/tools v0.0.0-20190710153321-831012c29e42
@@ -735,6 +737,7 @@ replace (
 	k8s.io/kubectl => k8s.io/kubectl v0.18.6
 	k8s.io/metrics => k8s.io/metrics v0.18.6
 	k8s.io/utils => k8s.io/utils v0.0.0-20200603063816-c1c6865ac451
+	kubesphere.io/api => ./staging/src/kubesphere.io/api
 	kubesphere.io/client-go => ./staging/src/kubesphere.io/client-go
 	kubesphere.io/monitoring-dashboard => kubesphere.io/monitoring-dashboard v0.1.2
 	rsc.io/binaryregexp => rsc.io/binaryregexp v0.2.0

@@ -19,7 +19,8 @@ import (
 	"github.com/go-openapi/strfmt"
 	"k8s.io/klog"
 
-	"kubesphere.io/kubesphere/pkg/apis/application/v1alpha1"
+	"kubesphere.io/api/application/v1alpha1"
+
 	"kubesphere.io/kubesphere/pkg/simple/client/s3"
 	"kubesphere.io/kubesphere/pkg/utils/idutils"
 )
@@ -65,7 +66,7 @@ func (c *attachmentOperator) CreateAttachment(data []byte) (*Attachment, error) 
 	}
 	id := idutils.GetUuid36(v1alpha1.HelmAttachmentPrefix)
 
-	err := c.backingStoreClient.Upload(id, id, bytes.NewBuffer(data))
+	err := c.backingStoreClient.Upload(id, id, bytes.NewBuffer(data), len(data))
 	if err != nil {
 		klog.Errorf("upload attachment failed, err: %s", err)
 		return nil, err

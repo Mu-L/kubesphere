@@ -31,7 +31,8 @@ import (
 	"k8s.io/client-go/util/retry"
 	"k8s.io/klog"
 
-	"kubesphere.io/kubesphere/pkg/apis/devops/v1alpha1"
+	"kubesphere.io/api/devops/v1alpha1"
+
 	"kubesphere.io/kubesphere/pkg/client/clientset/versioned"
 	"kubesphere.io/kubesphere/pkg/client/informers/externalversions"
 	"kubesphere.io/kubesphere/pkg/simple/client/s3"
@@ -103,7 +104,7 @@ func (s *s2iBinaryUploader) UploadS2iBinary(namespace, name, md5 string, fileHea
 	copy.Spec.FileName = fileHeader.Filename
 	copy.Spec.DownloadURL = fmt.Sprintf(GetS2iBinaryURL, namespace, name, copy.Spec.FileName)
 
-	err = s.s3Client.Upload(fmt.Sprintf("%s-%s", namespace, name), copy.Spec.FileName, binFile)
+	err = s.s3Client.Upload(fmt.Sprintf("%s-%s", namespace, name), copy.Spec.FileName, binFile, int(fileHeader.Size))
 	if err != nil {
 		if aerr, ok := err.(awserr.Error); ok {
 			switch aerr.Code() {

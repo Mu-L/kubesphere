@@ -17,18 +17,15 @@ limitations under the License.
 package openpitrix
 
 import (
-	"archive/tar"
 	"bytes"
-	"compress/gzip"
 	"context"
 	"encoding/base64"
 	"errors"
 	"fmt"
-	"io"
-	"io/ioutil"
 	"reflect"
 	"sort"
-	"strings"
+
+	"helm.sh/helm/v3/pkg/chart/loader"
 
 	"kubesphere.io/kubesphere/pkg/apiserver/query"
 
@@ -41,7 +38,8 @@ import (
 	"k8s.io/klog"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
-	"kubesphere.io/kubesphere/pkg/apis/application/v1alpha1"
+	"kubesphere.io/api/application/v1alpha1"
+
 	"kubesphere.io/kubesphere/pkg/constants"
 	"kubesphere.io/kubesphere/pkg/models"
 	"kubesphere.io/kubesphere/pkg/server/params"
@@ -202,7 +200,7 @@ func (c *applicationOperator) ModifyAppVersion(id string, request *ModifyAppVers
 		spec.Created = &now
 
 		// 3. save chart data to s3 storage, just overwrite the legacy data
-		err = c.backingStoreClient.Upload(dataKeyInStorage(versionCopy.GetWorkspace(), versionCopy.Name), versionCopy.Name, bytes.NewReader(request.Package))
+		err = c.backingStoreClient.Upload(dataKeyInStorage(versionCopy.GetWorkspace(), versionCopy.Name), versionCopy.Name, bytes.NewBuffer(request.Package), len(request.Package))
 		if err != nil {
 			klog.Errorf("upload chart for app version: %s/%s failed, error: %s", versionCopy.GetWorkspace(),
 				versionCopy.GetTrueName(), err)
@@ -490,7 +488,7 @@ func (c *applicationOperator) createApplicationVersion(ver *v1alpha1.HelmApplica
 		klog.Errorf("decode error: %s", err)
 		return nil, err
 	} else {
-		err = c.backingStoreClient.Upload(dataKeyInStorage(ver.GetWorkspace(), ver.Name), ver.Name, bytes.NewReader(ver.Spec.Data))
+		err = c.backingStoreClient.Upload(dataKeyInStorage(ver.GetWorkspace(), ver.Name), ver.Name, bytes.NewBuffer(ver.Spec.Data), len(ver.Spec.Data))
 		if err != nil {
 			klog.Errorf("upload chart for app version: %s/%s failed, error: %s", ver.GetWorkspace(),
 				ver.GetTrueName(), err)
@@ -530,43 +528,25 @@ func (c *applicationOperator) GetAppVersionFiles(versionId string, request *GetA
 	var version *v1alpha1.HelmApplicationVersion
 	var err error
 
+	// get chart data
 	version, err = c.getAppVersionByVersionIdWithData(versionId)
 	if err != nil {
+		klog.Errorf("get app version %s chart data failed: %v", versionId, err)
 		return nil, err
 	}
 
-	gzReader, err := gzip.NewReader(bytes.NewReader(version.Spec.Data))
+	// parse chart data
+	chartData, err := loader.LoadArchive(bytes.NewReader(version.Spec.Data))
 	if err != nil {
-		klog.Errorf("read app version %s failed, error: %s", versionId, err)
+		klog.Errorf("Failed to load package for app version: %s, error: %+v", versionId, err)
 		return nil, err
 	}
-
-	tarReader := tar.NewReader(gzReader)
 
 	res := &GetAppVersionPackageFilesResponse{Files: map[string]strfmt.Base64{}, VersionId: versionId}
-	for {
-		header, err := tarReader.Next()
-		if err == io.EOF {
-			break
-		}
-
-		if err != nil {
-			klog.Errorf("ExtractTarGz: Next() failed: %s", err.Error())
-			return res, err
-		}
-
-		switch header.Typeflag {
-		case tar.TypeReg:
-			curData, _ := ioutil.ReadAll(tarReader)
-			name := strings.TrimPrefix(header.Name, fmt.Sprintf("%s/", version.GetTrueName()))
-			res.Files[name] = curData
-		default:
-			klog.Errorf(
-				"ExtractTarGz: unknown type: %v in %s",
-				header.Typeflag,
-				header.Name)
-		}
+	for _, f := range chartData.Raw {
+		res.Files[f.Name] = f.Data
 	}
+
 	return res, nil
 }
 

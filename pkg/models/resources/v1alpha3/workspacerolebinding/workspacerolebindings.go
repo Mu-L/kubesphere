@@ -19,12 +19,15 @@ package workspacerolebinding
 import (
 	"k8s.io/apimachinery/pkg/runtime"
 
+	iamv1alpha2 "kubesphere.io/api/iam/v1alpha2"
+
 	"kubesphere.io/kubesphere/pkg/api"
-	iamv1alpha2 "kubesphere.io/kubesphere/pkg/apis/iam/v1alpha2"
 	"kubesphere.io/kubesphere/pkg/apiserver/query"
 	informers "kubesphere.io/kubesphere/pkg/client/informers/externalversions"
 	"kubesphere.io/kubesphere/pkg/models/resources/v1alpha3"
 )
+
+const RoleName = "rolename"
 
 type workspacerolebindingsGetter struct {
 	sharedInformers informers.SharedInformerFactory
@@ -75,6 +78,10 @@ func (d *workspacerolebindingsGetter) filter(object runtime.Object, filter query
 	if !ok {
 		return false
 	}
-
-	return v1alpha3.DefaultObjectMetaFilter(role.ObjectMeta, filter)
+	switch filter.Field {
+	case RoleName:
+		return role.RoleRef.Name == string(filter.Value)
+	default:
+		return v1alpha3.DefaultObjectMetaFilter(role.ObjectMeta, filter)
+	}
 }

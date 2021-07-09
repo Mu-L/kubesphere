@@ -21,6 +21,8 @@ import (
 	"fmt"
 	"reflect"
 
+	"k8s.io/apimachinery/pkg/util/validation"
+
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -36,9 +38,10 @@ import (
 	"k8s.io/klog"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 
-	iam1alpha2 "kubesphere.io/kubesphere/pkg/apis/iam/v1alpha2"
-	tenantv1alpha2 "kubesphere.io/kubesphere/pkg/apis/tenant/v1alpha2"
-	fedv1beta1types "kubesphere.io/kubesphere/pkg/apis/types/v1beta1"
+	iam1alpha2 "kubesphere.io/api/iam/v1alpha2"
+	tenantv1alpha2 "kubesphere.io/api/tenant/v1alpha2"
+	fedv1beta1types "kubesphere.io/api/types/v1beta1"
+
 	kubesphere "kubesphere.io/kubesphere/pkg/client/clientset/versioned"
 	iamv1alpha2informers "kubesphere.io/kubesphere/pkg/client/informers/externalversions/iam/v1alpha2"
 	fedv1beta1informers "kubesphere.io/kubesphere/pkg/client/informers/externalversions/types/v1beta1"
@@ -237,10 +240,13 @@ func (c *Controller) reconcile(key string) error {
 }
 
 func (c *Controller) deleteGroupBindings(group *iam1alpha2.Group) error {
-
+	if len(group.Name) > validation.LabelValueMaxLength {
+		// ignore invalid label value error
+		return nil
+	}
 	// Groupbindings that created by kubesphere will be deleted directly.
 	listOptions := metav1.ListOptions{
-		LabelSelector: labels.SelectorFromSet(labels.Set{iam1alpha2.GroupReferenceLabel: group.Name}).String(),
+		LabelSelector: labels.SelectorFromValidatedSet(labels.Set{iam1alpha2.GroupReferenceLabel: group.Name}).String(),
 	}
 	if err := c.ksClient.IamV1alpha2().GroupBindings().
 		DeleteCollection(context.Background(), *metav1.NewDeleteOptions(0), listOptions); err != nil {
@@ -252,8 +258,12 @@ func (c *Controller) deleteGroupBindings(group *iam1alpha2.Group) error {
 
 // remove all RoleBindings.
 func (c *Controller) deleteRoleBindings(group *iam1alpha2.Group) error {
+	if len(group.Name) > validation.LabelValueMaxLength {
+		// ignore invalid label value error
+		return nil
+	}
 	listOptions := metav1.ListOptions{
-		LabelSelector: labels.SelectorFromSet(labels.Set{iam1alpha2.GroupReferenceLabel: group.Name}).String(),
+		LabelSelector: labels.SelectorFromValidatedSet(labels.Set{iam1alpha2.GroupReferenceLabel: group.Name}).String(),
 	}
 	deleteOptions := *metav1.NewDeleteOptions(0)
 

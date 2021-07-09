@@ -24,7 +24,7 @@ import (
 	rt "runtime"
 	"time"
 
-	"kubesphere.io/kubesphere/pkg/apis/notification/v2beta1"
+	"kubesphere.io/api/notification/v2beta1"
 
 	openpitrixv2alpha1 "kubesphere.io/kubesphere/pkg/kapis/openpitrix/v2alpha1"
 
@@ -39,11 +39,12 @@ import (
 	"k8s.io/klog"
 	runtimecache "sigs.k8s.io/controller-runtime/pkg/cache"
 
-	clusterv1alpha1 "kubesphere.io/kubesphere/pkg/apis/cluster/v1alpha1"
-	iamv1alpha2 "kubesphere.io/kubesphere/pkg/apis/iam/v1alpha2"
-	notificationv2beta1 "kubesphere.io/kubesphere/pkg/apis/notification/v2beta1"
-	tenantv1alpha1 "kubesphere.io/kubesphere/pkg/apis/tenant/v1alpha1"
-	typesv1beta1 "kubesphere.io/kubesphere/pkg/apis/types/v1beta1"
+	clusterv1alpha1 "kubesphere.io/api/cluster/v1alpha1"
+	iamv1alpha2 "kubesphere.io/api/iam/v1alpha2"
+	notificationv2beta1 "kubesphere.io/api/notification/v2beta1"
+	tenantv1alpha1 "kubesphere.io/api/tenant/v1alpha1"
+	typesv1beta1 "kubesphere.io/api/types/v1beta1"
+
 	audit "kubesphere.io/kubesphere/pkg/apiserver/auditing"
 	"kubesphere.io/kubesphere/pkg/apiserver/authentication/authenticators/basic"
 	"kubesphere.io/kubesphere/pkg/apiserver/authentication/authenticators/jwttoken"
@@ -228,7 +229,7 @@ func (s *APIServer) installKubeSphereAPIs() {
 		s.KubernetesClient.Master()))
 	urlruntime.Must(tenantv1alpha2.AddToContainer(s.container, s.InformerFactory, s.KubernetesClient.Kubernetes(),
 		s.KubernetesClient.KubeSphere(), s.EventsClient, s.LoggingClient, s.AuditingClient, amOperator, rbacAuthorizer, s.MonitoringClient, s.RuntimeCache, s.Config.MeteringOptions))
-	urlruntime.Must(terminalv1alpha2.AddToContainer(s.container, s.KubernetesClient.Kubernetes(), s.KubernetesClient.Config()))
+	urlruntime.Must(terminalv1alpha2.AddToContainer(s.container, s.KubernetesClient.Kubernetes(), rbacAuthorizer, s.KubernetesClient.Config()))
 	urlruntime.Must(clusterkapisv1alpha1.AddToContainer(s.container,
 		s.InformerFactory.KubernetesSharedInformerFactory(),
 		s.InformerFactory.KubeSphereSharedInformerFactory(),
@@ -447,8 +448,6 @@ func (s *APIServer) waitForResourceSync(stopCh <-chan struct{}) error {
 		{Group: "iam.kubesphere.io", Version: "v1alpha2", Resource: "workspaceroles"},
 		{Group: "iam.kubesphere.io", Version: "v1alpha2", Resource: "workspacerolebindings"},
 		{Group: "iam.kubesphere.io", Version: "v1alpha2", Resource: "loginrecords"},
-		{Group: "iam.kubesphere.io", Version: "v1alpha2", Resource: "groups"},
-		{Group: "iam.kubesphere.io", Version: "v1alpha2", Resource: "groupbindings"},
 		{Group: "cluster.kubesphere.io", Version: "v1alpha1", Resource: "clusters"},
 		{Group: "devops.kubesphere.io", Version: "v1alpha3", Resource: "devopsprojects"},
 		{Group: "network.kubesphere.io", Version: "v1alpha1", Resource: "ippools"},

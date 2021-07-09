@@ -26,7 +26,7 @@ jobs:
         run: go mod vendor
 
       - name: Create kind cluster
-        uses: helm/kind-action@v1.0.0-rc.1
+        uses: helm/kind-action@v1.2.0
         with:
           config: .github/workflows/kind/kind.yaml
 
@@ -35,3 +35,12 @@ jobs:
 
       - name: Run e2e testing
         run: go test ./test/e2e
+
+      - name: slack
+        uses: 8398a7/action-slack@v3
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        with:
+          status: ${{ job.status }}
+          fields: repo,message,commit,author,action,eventName,ref,workflow,job,took
+        if: failure()

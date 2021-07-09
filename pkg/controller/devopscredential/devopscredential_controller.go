@@ -40,7 +40,8 @@ import (
 	"k8s.io/client-go/util/workqueue"
 	"k8s.io/klog"
 
-	devopsv1alpha3 "kubesphere.io/kubesphere/pkg/apis/devops/v1alpha3"
+	devopsv1alpha3 "kubesphere.io/api/devops/v1alpha3"
+
 	kubesphereclient "kubesphere.io/kubesphere/pkg/client/clientset/versioned"
 	"kubesphere.io/kubesphere/pkg/constants"
 	"kubesphere.io/kubesphere/pkg/controller/utils"
@@ -75,7 +76,7 @@ type Controller struct {
 }
 
 func NewController(client clientset.Interface,
-	devopsClinet devopsClient.Interface,
+	devopsClient devopsClient.Interface,
 	namespaceInformer corev1informer.NamespaceInformer,
 	secretInformer corev1informer.SecretInformer) *Controller {
 
@@ -88,7 +89,7 @@ func NewController(client clientset.Interface,
 
 	v := &Controller{
 		client:           client,
-		devopsClient:     devopsClinet,
+		devopsClient:     devopsClient,
 		workqueue:        workqueue.NewNamedRateLimitingQueue(workqueue.DefaultControllerRateLimiter(), "devopscredential"),
 		secretLister:     secretInformer.Lister(),
 		secretSynced:     secretInformer.Informer().HasSynced,
